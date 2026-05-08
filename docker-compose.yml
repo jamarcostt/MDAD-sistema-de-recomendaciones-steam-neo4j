@@ -1,0 +1,71 @@
+services:
+
+  neo4j:
+    image: neo4j:${NEO4J_VERSION}
+    container_name: steam-neo4j
+    restart: unless-stopped
+
+    ports:
+      - "${NEO4J_HTTP_PORT}:7474"
+      - "${NEO4J_BOLT_PORT}:7687"
+
+    environment:
+      NEO4J_AUTH: ${NEO4J_AUTH}
+
+      NEO4J_server_memory_heap_initial__size: ${NEO4J_HEAP_INITIAL}
+      NEO4J_server_memory_heap_max__size:     ${NEO4J_HEAP_MAX}
+      NEO4J_server_memory_pagecache_size:     ${NEO4J_PAGECACHE}
+
+      NEO4J_server_directories_import: /import
+
+      # Desactiva la validacion estricta del conf para que ajustes desconocidos
+      # no bloqueen el arranque
+      NEO4J_server_config_strict__validation_enabled: "false"
+
+    volumes:
+      - neo4j_data:/data
+      - neo4j_logs:/logs
+      - ./data/csv:/import:ro
+      - ./neo4j/conf/neo4j.conf:/conf/neo4j.conf:ro
+
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://localhost:7474 || exit 1"]
+      interval: 15s
+      timeout: 10s
+      retries: 20
+      start_period: 60s
+
+    networks:
+      - steam-net
+
+  neo4j-init:
+    image: neo4j:${NEO4J_VERSION}
+    container_name: steam-neo4j-init
+    restart: "no"
+
+    depends_on:
+      neo4j:
+        condition: service_healthy
+
+    environment:
+      NEO4J_PASSWORD: ${NEO4J_PASSWORD}
+
+    volumes:
+      - ./neo4j/init/init.sh:/init.sh:ro
+      - ./scripts/load_data.cypher:/load_data.cypher:ro
+
+    entrypoint: ["/bin/bash", "/init.sh"]
+
+    networks:
+      - steam-net
+
+volumes:
+  neo4j_data:
+    name: steam-neo4j-data
+  neo4j_logs:
+    name: steam-neo4j-logs
+
+networks:
+  steam-net:
+    name: steam-network
+    driver: bridge
