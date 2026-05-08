@@ -1,0 +1,13 @@
+# Datos (no subas los CSVs al repo — son demasiado grandes)
+data/csv/
+
+# Secretos
+.env
+
+# Volúmenes locales de Neo4j si alguien usa bind mounts en lugar de volúmenes Docker
+neo4j/data/
+neo4j/logs/
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
