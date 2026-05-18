@@ -1,13 +1,42 @@
-# Datos (no subas los CSVs al repo — son demasiado grandes)
-data/csv/
+# =============================================================
+#  MatchPlay — .gitignore
+# =============================================================
 
-# Secretos
+# ── Credenciales y configuración sensible ────────────────────
 .env
 
-# Volúmenes locales de Neo4j si alguien usa bind mounts en lugar de volúmenes Docker
+# ── Neo4j (datos generados por Docker) ───────────────────────
 neo4j/data/
 neo4j/logs/
+neo4j/plugins/
+neo4j/init/
 
-# Sistema operativo
+# ── CSVs del dataset (demasiado grandes para el repo) ────────
+*.csv
+
+# ── Spring Boot / Maven ──────────────────────────────────────
+api/target/
+**/target/
+*.jar
+*.war
+*.class
+.mvn/
+!.mvn/wrapper/maven-wrapper.jar
+!.mvn/wrapper/maven-wrapper.properties
+
+# ── IDEs ─────────────────────────────────────────────────────
+.idea/
+*.iml
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+
+# ── Sistema operativo ─────────────────────────────────────────
 .DS_Store
 Thumbs.db
+desktop.ini
+
+# ── Logs de ejecución─────────────────────────────────
+*.log

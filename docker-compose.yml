@@ -1,0 +1,26 @@
+services:
+  neo4j:
+    image: neo4j:5.18
+    container_name: neo4j-steam
+    ports:
+      - "7474:7474"   # Neo4j Browser
+      - "7687:7687"   # Bolt (driver Java / Spring Boot)
+    volumes:
+      - ./neo4j/data:/data
+      - ./neo4j/logs:/logs
+      - ./neo4j/import:/var/lib/neo4j/import
+      - ./neo4j/plugins:/plugins
+      - ./neo4j/init:/var/lib/neo4j/init   # scripts de inicialización
+    environment:
+      - NEO4J_AUTH=${NEO4J_USER}/${NEO4J_PASSWORD}
+      - NEO4J_PLUGINS=["apoc"]
+      - NEO4J_apoc_export_file_enabled=true
+      - NEO4J_apoc_import_file_enabled=true
+      # Aumenta la memoria heap para la carga masiva de reviews
+
+    healthcheck:
+      test: ["CMD", "cypher-shell", "-u", "neo4j", "-p", "Password1234", "RETURN 1"]
+      interval: 10s
+      timeout: 10s
+      retries: 10
+      start_period: 30s
