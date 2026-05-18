@@ -1,134 +1,176 @@
-# Steam Recommendation — Neo4j en Docker
+# MatchPlay — Neo4j en Docker
+
+Sistema de recomendación de videojuegos de Steam basado en grafos con Neo4j.
+
+---
 
 ## Estructura del proyecto
 
 ```
-neo4j-steam/
-├── docker-compose.yml        # Orquestación
-├── .env                      # Contraseñas y configuración (NO subas al repo)
-├── data/
-│   └── csv/                  # ← Copia aquí tus 4 CSVs filtrados
-├── neo4j/
-│   ├── conf/neo4j.conf       # Configuración de memoria
-│   └── init/init.sh          # Script de carga automática
-└── scripts/
-    └── load_data.cypher      # Queries de importación (referencia / manual)
+matchplay/
+├── docker-compose.yml          # Orquestación del contenedor Neo4j
+├── .env                        # Credenciales y configuración (NO subas al repo)
+├── .gitignore
+├── init_graph.cypher           # Script de carga del grafo (referencia / manual)
+├── load_data.ps1               # Script PowerShell de despliegue automático (Windows)
+└── neo4j/
+    ├── data/                   # Datos persistentes del grafo (generado por Docker)
+    ├── logs/                   # Logs de Neo4j (generado por Docker)
+    ├── plugins/                # Plugins instalados (ej. APOC)
+    ├── init/                   # Scripts de inicialización copiados automáticamente
+    └── import/                 # ← Copia aquí tus 4 CSVs filtrados
+        ├── recommendations_out.csv
+        ├── games_out.csv
+        ├── users_out.csv
+        └── metadata_out.csv
 ```
+
+---
+
+## Requisitos previos
+
+- [Docker Desktop](https://www.docker.com/products/docker-desktop/) corriendo
+- PowerShell 7+ (Windows)
+- Los 4 CSVs generados por `filter_steam_dataset.py`
 
 ---
 
 ## Puesta en marcha (primera vez)
 
-### 1. Copia los CSVs filtrados
+### 1. Configura el archivo `.env`
 
-```bash
-cp /ruta/a/tus/csvs/*.csv ./data/csv/
+Crea un archivo `.env` en la raíz del proyecto con este contenido:
+
+```env
+NEO4J_USER=neo4j
+NEO4J_PASSWORD=TuPasswordSegura
+
+JWT_SECRET=una-clave-larga-y-aleatoria-minimo-32-caracteres
+JWT_EXPIRATION_MS=86400000
+
+CORS_ALLOWED_ORIGIN=http://localhost:4200
 ```
 
-Deben estar estos cuatro archivos:
-- `users_filtered.csv`
-- `games_filtered.csv`
-- `metadata_filtered.csv`
-- `recommendations_filtered.csv`
+### 2. Copia los CSVs filtrados
 
-### 2. Ajusta la contraseña en `.env`
-
-Abre `.env` y cambia `SteamRecsPass2024!` por una contraseña segura.
-
-### 3. Arranca los contenedores
-
-```bash
-docker compose up -d
+```powershell
+copy recommendations_out.csv .\neo4j\import\
+copy games_out.csv           .\neo4j\import\
+copy users_out.csv           .\neo4j\import\
+copy metadata_out.csv        .\neo4j\import\
 ```
 
-Esto hace:
-1. Descarga la imagen `neo4j:5.18.0` (primera vez ~500 MB)
-2. Arranca el contenedor `steam-neo4j`
-3. Cuando Neo4j está sano, arranca `steam-neo4j-init`
-4. El init detecta que no hay datos → ejecuta la importación
-5. El init se detiene solo al terminar
+### 3. Ejecuta el script de despliegue
 
-### 4. Monitoriza la importación
-
-```bash
-# Ver el progreso en tiempo real
-docker logs -f steam-neo4j-init
-
-# Ver logs de Neo4j
-docker logs -f steam-neo4j
+```powershell
+.\load_data.ps1
 ```
 
-La importación tarda entre **15 y 45 minutos** según tu hardware.
+Este script hace todo automáticamente:
+1. Verifica que los CSVs están en su sitio
+2. Levanta el contenedor Neo4j vía `docker compose`
+3. Espera a que Neo4j esté listo
+4. Detecta si ya hay datos y pide confirmación antes de sobreescribir
+5. Ejecuta `init_graph.cypher` con toda la carga del grafo
+6. Muestra la verificación final de nodos creados
 
-### 5. Accede a Neo4j Browser
+La carga de reviews puede tardar **2-5 minutos** según el hardware.
 
-Una vez termine la importación:
+### 4. Accede a Neo4j Browser
 
-- URL: http://localhost:7474
-- Usuario: `neo4j`
-- Contraseña: la que pusiste en `.env`
+```
+URL:      http://localhost:7474
+Usuario:  neo4j
+Password: la que pusiste en .env
+Bolt:     bolt://localhost:7687
+```
+
+---
+
+## Verificación de la carga
+
+Ejecuta esto en Neo4j Browser para confirmar que todo está correcto:
+
+```cypher
+MATCH (n) RETURN labels(n) AS tipo, count(n) AS total ORDER BY total DESC;
+```
+
+Resultado esperado:
+
+| tipo     | total   |
+|----------|---------|
+| Review   | 1358215 |
+| User     | 75302   |
+| Game     | 29320   |
+| Tag      | 441     |
 
 ---
 
 ## Uso habitual (ya con datos cargados)
 
-```bash
-# Arrancar (los datos ya están en el volumen)
-docker compose up -d neo4j
+```powershell
+# Arrancar Neo4j (los datos persisten en el volumen)
+docker compose up -d
 
-# Parar (sin borrar datos)
+# Parar sin borrar datos
 docker compose stop
 
-# Parar y eliminar contenedores (datos intactos en volúmenes)
+# Parar y eliminar contenedores (datos intactos)
 docker compose down
 
 # Ver estado
 docker compose ps
-```
 
-El contenedor `neo4j-init` sólo necesitas levantarlo la primera vez.
-En arranques posteriores puedes ignorarlo o simplemente hacer:
-```bash
-docker compose up -d neo4j
+# Ver logs en tiempo real
+docker logs neo4j-steam --follow
 ```
 
 ---
 
 ## Borrar los datos y reimportar desde cero
 
-```bash
+```powershell
 # Elimina contenedores Y volúmenes (borra todos los datos del grafo)
 docker compose down -v
 
-# Vuelve a arrancar — la importación se ejecutará de nuevo
-docker compose up -d
+# Vuelve a desplegar desde cero
+.\load_data.ps1
 ```
 
 ---
 
-## Ajuste de memoria
+## Consultas de ejemplo
 
-Si tu máquina tiene menos de 16 GB de RAM, edita `.env`:
-
-| RAM disponible | HEAP_INITIAL | HEAP_MAX | PAGECACHE |
-|---------------|-------------|---------|----------|
-| 8 GB          | 1g          | 2g      | 2g       |
-| 16 GB         | 2g          | 4g      | 4g       |
-| 32 GB         | 4g          | 8g      | 8g       |
-
----
-
-## Consulta de recomendación
-
-Desde Neo4j Browser, prueba la consulta híbrida con un usuario real:
-
+**Verificar relaciones del grafo:**
 ```cypher
-// Primero, encuentra un usuario con muchas recomendaciones
-MATCH (u:User)-[r:RECOMMENDS]->()
-WHERE r.is_recommended = true
-RETURN u.user_id, count(r) AS total
-ORDER BY total DESC
+MATCH (u:User)-[:WROTE]->(r:Review)-[:ABOUT]->(g:Game)
+RETURN u.user_id, r.is_recommended, g.title
 LIMIT 5;
 ```
 
-Luego sustituye el ID en la consulta híbrida de `scripts/load_data.cypher`.
+**Recomendación basada en contenido** (juegos con tags similares a los que te gustan):
+```cypher
+MATCH (u:User {user_id: $id})-[:LIKES_TAG]->(t:Tag)<-[:HAS_TAG]-(g:Game)
+RETURN g.title, count(t) AS coincidencias
+ORDER BY coincidencias DESC LIMIT 10;
+```
+
+**Recomendación colaborativa** (juegos que juegan usuarios similares a ti):
+```cypher
+MATCH (u:User {user_id: $id})-[:SIMILAR_TO]->(other:User)
+      -[:WROTE]->(:Review)-[:ABOUT]->(g:Game)
+WHERE NOT (u)-[:WROTE]->(:Review)-[:ABOUT]->(g)
+RETURN g.title, count(other) AS popularidad
+ORDER BY popularidad DESC LIMIT 10;
+```
+
+---
+
+## Stack del proyecto
+
+| Capa       | Tecnología              |
+|------------|-------------------------|
+| Base de datos | Neo4j 5.18 + APOC    |
+| Backend    | Java 21 + Spring Boot 3.5 |
+| Frontend   | Angular 21.2 (zoneless) |
+| Despliegue | Docker + Docker Compose |
