@@ -19,7 +19,7 @@ services:
       # Aumenta la memoria heap para la carga masiva de reviews
 
     healthcheck:
-      test: ["CMD", "cypher-shell", "-u", "neo4j", "-p", "MiPassword123", "RETURN 1"]
+      test: ["CMD", "cypher-shell", "-u", "neo4j", "-p", "Password1234", "RETURN 1"]
       interval: 10s
       timeout: 10s
       retries: 10
