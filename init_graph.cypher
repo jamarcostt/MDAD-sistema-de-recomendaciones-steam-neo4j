@@ -56,3 +56,8 @@ CALL {
   MERGE (u)-[:WROTE]->(r)
   MERGE (r)-[:ABOUT]->(g)
 } IN TRANSACTIONS OF 10000 ROWS
+
+// --- INICIALIZACIÓN DE LA API ---
+// Crear el usuario por defecto para las pruebas y relaciones
+MERGE (u:AppUser {id: 'app_user_1'})
+ON CREATE SET u.name = 'MatchPlay User';

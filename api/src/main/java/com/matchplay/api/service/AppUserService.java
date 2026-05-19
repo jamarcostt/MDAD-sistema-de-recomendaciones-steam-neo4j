@@ -24,24 +24,27 @@ public class AppUserService {
 
         // ── Biblioteca ────────────────────────────────────────────
 
+        // ── Biblioteca ────────────────────────────────────────────
+
         public AppUser getUser() {
                 return appUserRepository.findById(USER_ID)
-                                .orElseGet(this::createUser);
-        }
-
-        private AppUser createUser() {
-                AppUser user = new AppUser();
-                return appUserRepository.save(user);
+                                .orElseThrow(() -> new RuntimeException(
+                                                "Error crítico: El usuario 'app_user_1' no fue inicializado en la base de datos por el script de Cypher."));
         }
 
         public AppUser addGameToLibrary(Long appId) {
-                // Verificar que el juego existe
+                // 1. Garantizar que el nodo AppUser existe ANTES de hacer la relación
+                getUser();
+
+                // 2. Verificar que el juego existe en el catálogo
                 gameRepository.findById(appId)
                                 .orElseThrow(() -> new RuntimeException("Juego no encontrado: " + appId));
 
-                // Crear la relación OWNS directamente sin tocar el nodo Game
+                // 3. Crear la relación (MATCH separados para evitar el Cartesian Product
+                // Warning)
                 neo4jClient.query(
-                                "MATCH (u:AppUser {id: $userId}), (g:Game {app_id: $appId}) " +
+                                "MATCH (u:AppUser {id: $userId}) " +
+                                                "MATCH (g:Game {app_id: $appId}) " +
                                                 "MERGE (u)-[:OWNS]->(g)")
                                 .bind(USER_ID).to("userId").bind(appId).to("appId").run();
 

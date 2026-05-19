@@ -14,8 +14,8 @@ $tests = @(
     @{ Name="Tags: Top 10 Etiquetas"; Route="/tags/top?limit=10"; Method="GET" }
 
     # --- 3. PRUEBAS DE BIBLIOTECA (Escritura POST) ---
-    @{ Name="Usuario: Anadir CS:GO (730)"; Route="/user/library/730"; Method="POST" }
-    @{ Name="Usuario: Anadir PUBG (578080)"; Route="/user/library/578080"; Method="POST" }
+    @{ Name="Usuario: Anadir CS:GO (304930)"; Route="/user/library/304930"; Method="POST" }
+    @{ Name="Usuario: Anadir PUBG (433850)"; Route="/user/library/433850"; Method="POST" }
     @{ Name="Usuario: Ver Biblioteca"; Route="/user/library"; Method="GET" }
 
     # --- 4. PRUEBAS DE ANALISIS (Dependen de tener juegos en la biblioteca) ---
@@ -34,8 +34,8 @@ $tests = @(
     @{ Name="Grafo: Tags Relacionadas"; Route="/user/graph/related-tags"; Method="GET" }
 
     # --- 7. PRUEBAS DE LIMPIEZA (Borrado DELETE) ---
-    @{ Name="Usuario: Eliminar CS:GO (730)"; Route="/user/library/730"; Method="DELETE" }
-    @{ Name="Usuario: Eliminar PUBG (578080)"; Route="/user/library/578080"; Method="DELETE" }
+    @{ Name="Usuario: Eliminar CS:GO (304930)"; Route="/user/library/304930"; Method="DELETE" }
+    @{ Name="Usuario: Eliminar PUBG (433850)"; Route="/user/library/433850"; Method="DELETE" }
 )
 
 Write-Host "=================================================" -ForegroundColor Cyan
