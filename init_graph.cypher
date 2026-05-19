@@ -21,7 +21,7 @@ LOAD CSV WITH HEADERS FROM 'file:///games_out.csv' AS row
 MERGE (g:Game {app_id: toInteger(row.app_id)})
 SET g.title          = row.title,
     g.date_release   = row.date_release,
-    g.price          = toFloat(row.price),
+    g.price_final          = toFloat(row.price_final),
     g.positive_ratio = toInteger(row.positive_ratio),
     g.user_reviews   = toInteger(row.user_reviews),
     g.rating         = row.rating;
