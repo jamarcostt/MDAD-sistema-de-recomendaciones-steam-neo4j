@@ -19,8 +19,9 @@ public class GameController {
 
     @GetMapping("/top-reviews")
     public ResponseEntity<List<Game>> getTopByReviews(
+            @RequestParam(defaultValue = "0") int skip,
             @RequestParam(defaultValue = "20") int limit) {
-        return ResponseEntity.ok(gameService.getTopByReviews(limit));
+        return ResponseEntity.ok(gameService.getTopByReviews(skip, limit));
     }
 
     @GetMapping("/top-rated")

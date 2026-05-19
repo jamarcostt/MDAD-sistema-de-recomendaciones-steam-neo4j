@@ -16,8 +16,8 @@ public class GameService {
     private final GameRepository gameRepository;
     private final Neo4jClient neo4jClient;
 
-    public List<Game> getTopByReviews(int limit) {
-        return gameRepository.findTopByUserReviews(limit);
+    public List<Game> getTopByReviews(int skip, int limit) {
+        return gameRepository.findTopByUserReviews(skip, limit);
     }
 
     public List<Game> getTopByPositiveRatio(int limit) {

@@ -8,8 +8,8 @@ import java.util.List;
 public interface GameRepository extends Neo4jRepository<Game, Long> {
 
     @Query("MATCH (g:Game) WHERE g.user_reviews IS NOT NULL " +
-            "RETURN g ORDER BY g.user_reviews DESC LIMIT $limit")
-    List<Game> findTopByUserReviews(int limit);
+            "RETURN g ORDER BY g.user_reviews DESC SKIP $skip LIMIT $limit")
+    List<Game> findTopByUserReviews(int skip, int limit);
 
     @Query("MATCH (g:Game) WHERE g.positive_ratio IS NOT NULL AND g.user_reviews >= 100 " +
             "RETURN g ORDER BY g.positive_ratio DESC LIMIT $limit")
