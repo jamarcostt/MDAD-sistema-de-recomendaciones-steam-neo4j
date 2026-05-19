@@ -6,7 +6,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -18,7 +17,8 @@ public class TagController {
 
     @GetMapping("/top")
     public ResponseEntity<Collection<Map<String, Object>>> getTopTags(
+            @RequestParam(defaultValue = "0") int skip,
             @RequestParam(defaultValue = "20") int limit) {
-        return ResponseEntity.ok(tagService.getTopTags(limit));
+        return ResponseEntity.ok(tagService.getTopTags(skip, limit));
     }
 }

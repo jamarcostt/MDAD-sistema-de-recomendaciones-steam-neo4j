@@ -26,8 +26,9 @@ public class GameController {
 
     @GetMapping("/top-rated")
     public ResponseEntity<List<Game>> getTopByPositiveRatio(
+            @RequestParam(defaultValue = "0") int skip,
             @RequestParam(defaultValue = "20") int limit) {
-        return ResponseEntity.ok(gameService.getTopByPositiveRatio(limit));
+        return ResponseEntity.ok(gameService.getTopByPositiveRatio(skip, limit));
     }
 
     @GetMapping("/price-distribution")
@@ -38,14 +39,16 @@ public class GameController {
     @GetMapping("/by-tag")
     public ResponseEntity<List<Game>> getByTag(
             @RequestParam String tagName,
+            @RequestParam(defaultValue = "0") int skip,
             @RequestParam(defaultValue = "20") int limit) {
-        return ResponseEntity.ok(gameService.getGamesByTag(tagName, limit));
+        return ResponseEntity.ok(gameService.getGamesByTag(tagName, skip, limit));
     }
 
     @GetMapping("/search")
     public ResponseEntity<List<Game>> searchGames(
             @RequestParam String q,
+            @RequestParam(defaultValue = "0") int skip,
             @RequestParam(defaultValue = "20") int limit) {
-        return ResponseEntity.ok(gameService.searchGames(q, limit));
+        return ResponseEntity.ok(gameService.searchGames(q, skip, limit));
     }
 }

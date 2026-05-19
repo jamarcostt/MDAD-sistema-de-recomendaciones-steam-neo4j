@@ -20,8 +20,8 @@ public class GameService {
         return gameRepository.findTopByUserReviews(skip, limit);
     }
 
-    public List<Game> getTopByPositiveRatio(int limit) {
-        return gameRepository.findTopByPositiveRatio(limit);
+    public List<Game> getTopByPositiveRatio(int skip, int limit) {
+        return gameRepository.findTopByPositiveRatio(skip, limit);
     }
 
     public Collection<Map<String, Object>> getPriceDistribution() {
@@ -35,15 +35,14 @@ public class GameService {
                 .fetch().all();
     }
 
-    public List<Game> getGamesByTag(String tagName, int limit) {
-        return gameRepository.findByTag(tagName, limit);
+    public List<Game> getGamesByTag(String tagName, int skip, int limit) {
+        return gameRepository.findByTag(tagName, skip, limit);
     }
 
-    public List<Game> searchGames(String query, int limit) {
-        // Si la búsqueda está vacía, evitamos cargar toda la base de datos
+    public List<Game> searchGames(String query, int skip, int limit) {
         if (query == null || query.trim().isEmpty()) {
             return List.of();
         }
-        return gameRepository.searchByTitle(query.trim(), limit);
+        return gameRepository.searchByTitle(query.trim(), skip, limit);
     }
 }
