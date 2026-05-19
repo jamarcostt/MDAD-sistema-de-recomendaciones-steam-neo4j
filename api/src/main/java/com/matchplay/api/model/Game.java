@@ -2,6 +2,7 @@ package com.matchplay.api.model;
 
 import lombok.Data;
 import org.springframework.data.neo4j.core.schema.*;
+import java.util.ArrayList;
 import java.util.List;
 
 @Data
@@ -31,5 +32,5 @@ public class Game {
     private String rating;
 
     @Relationship(type = "HAS_TAG", direction = Relationship.Direction.OUTGOING)
-    private List<Tag> tags;
+    private List<Tag> tags = new ArrayList<>();
 }
