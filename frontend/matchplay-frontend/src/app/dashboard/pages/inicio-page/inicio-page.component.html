@@ -66,15 +66,15 @@
               <span>{{ (game.positiveRatio / 20) | number:'1.1-1' }}</span>
             </div>
           </div>
-          <!-- <div class="flex flex-wrap gap-2 mt-2">
+          <div class="flex flex-wrap gap-2 mt-2">
             @if (game.tags && game.tags.length > 0) {
-              @for (tag of game.tags | slice:0:3          ; track $index) {
+              @for (tag of game.tags | slice:0:3 ; track $index) {
                 <div class="badge badge-primary badge-outline badge-sm font-bold">{{ tag.name || tag }}</div>
               }
             } @else {
               <div class="badge badge-ghost badge-sm font-bold text-base-content/40">Sin etiquetas</div>
             }
-          </div> -->
+          </div>
           <div class="card-actions justify-end items-center mt-5">
             <span class="text-sm font-semibold text-base-content/70">{{ game.userReviews | number }} reseñas</span>
           </div>

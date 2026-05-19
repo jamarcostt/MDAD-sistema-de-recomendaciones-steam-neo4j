@@ -6,7 +6,7 @@ import { GamesService } from '../../services/games.service';
 @Component({
   selector: 'app-inicio-page',
   standalone: true,
-  imports: [DecimalPipe],
+  imports: [DecimalPipe, SlicePipe],
   templateUrl: './inicio-page.component.html',
   // Si tienes CSS específico, añádelo aquí
 })
