@@ -17,21 +17,48 @@ neo4j/init/
 # ── Spring Boot / Maven ──────────────────────────────────────
 api/target/
 **/target/
+target/
 *.jar
 *.war
 *.class
 .mvn/
 !.mvn/wrapper/maven-wrapper.jar
 !.mvn/wrapper/maven-wrapper.properties
+.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+HELP.md
 
 # ── IDEs ─────────────────────────────────────────────────────
 .idea/
+.idea
 *.iml
+*.iws
+*.ipr
 .vscode/
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
+
+### STS ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+
+### NetBeans ###
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+build/
+!**/src/main/**/build/
+!**/src/test/**/build/
 
 # ── Sistema operativo ─────────────────────────────────────────
 .DS_Store
@@ -40,3 +67,5 @@ desktop.ini
 
 # ── Logs de ejecución─────────────────────────────────
 *.log
+
+start.ps1

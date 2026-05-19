@@ -21,7 +21,7 @@ LOAD CSV WITH HEADERS FROM 'file:///games_out.csv' AS row
 MERGE (g:Game {app_id: toInteger(row.app_id)})
 SET g.title          = row.title,
     g.date_release   = row.date_release,
-    g.price          = toFloat(row.price),
+    g.price_final          = toFloat(row.price_final),
     g.positive_ratio = toInteger(row.positive_ratio),
     g.user_reviews   = toInteger(row.user_reviews),
     g.rating         = row.rating;
@@ -56,3 +56,8 @@ CALL {
   MERGE (u)-[:WROTE]->(r)
   MERGE (r)-[:ABOUT]->(g)
 } IN TRANSACTIONS OF 10000 ROWS
+
+// --- INICIALIZACIÓN DE LA API ---
+// Crear el usuario por defecto para las pruebas y relaciones
+MERGE (u:AppUser {id: 'app_user_1'})
+ON CREATE SET u.name = 'MatchPlay User';
