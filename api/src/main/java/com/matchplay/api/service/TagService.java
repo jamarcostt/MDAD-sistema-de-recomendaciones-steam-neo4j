@@ -12,11 +12,11 @@ public class TagService {
 
     private final Neo4jClient neo4jClient;
 
-    public Collection<Map<String, Object>> getTopTags(int limit) {
+    public Collection<Map<String, Object>> getTopTags(int skip, int limit) {
         return neo4jClient.query(
                 "MATCH (g:Game)-[:HAS_TAG]->(t:Tag) " +
                         "RETURN t.name AS tag, count(g) AS total " +
-                        "ORDER BY total DESC LIMIT $limit")
-                .bind(limit).to("limit").fetch().all();
+                        "ORDER BY total DESC SKIP $skip LIMIT $limit")
+                .bind(skip).to("skip").bind(limit).to("limit").fetch().all();
     }
 }

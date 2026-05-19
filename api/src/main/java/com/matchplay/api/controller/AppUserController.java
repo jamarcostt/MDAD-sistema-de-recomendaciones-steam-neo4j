@@ -7,7 +7,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -53,26 +52,30 @@ public class AppUserController {
 
     @GetMapping("/missing-tags")
     public ResponseEntity<Collection<Map<String, Object>>> getMissingTags(
+            @RequestParam(defaultValue = "0") int skip,
             @RequestParam(defaultValue = "10") int limit) {
-        return ResponseEntity.ok(appUserService.getMissingTags(limit));
+        return ResponseEntity.ok(appUserService.getMissingTags(skip, limit));
     }
 
     @GetMapping("/recommendations/content")
     public ResponseEntity<Collection<Map<String, Object>>> getContentBased(
+            @RequestParam(defaultValue = "0") int skip,
             @RequestParam(defaultValue = "20") int limit) {
-        return ResponseEntity.ok(appUserService.getContentBasedRecommendations(limit));
+        return ResponseEntity.ok(appUserService.getContentBasedRecommendations(skip, limit));
     }
 
     @GetMapping("/recommendations/collaborative")
     public ResponseEntity<Collection<Map<String, Object>>> getCollaborative(
+            @RequestParam(defaultValue = "0") int skip,
             @RequestParam(defaultValue = "20") int limit) {
-        return ResponseEntity.ok(appUserService.getCollaborativeRecommendations(limit));
+        return ResponseEntity.ok(appUserService.getCollaborativeRecommendations(skip, limit));
     }
 
     @GetMapping("/recommendations/hybrid")
     public ResponseEntity<Collection<Map<String, Object>>> getHybrid(
+            @RequestParam(defaultValue = "0") int skip,
             @RequestParam(defaultValue = "20") int limit) {
-        return ResponseEntity.ok(appUserService.getHybridRecommendations(limit));
+        return ResponseEntity.ok(appUserService.getHybridRecommendations(skip, limit));
     }
 
     @GetMapping("/graph/similar-games")

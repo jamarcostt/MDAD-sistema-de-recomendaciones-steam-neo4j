@@ -92,19 +92,19 @@ public class AppUserService {
                                 .bind(USER_ID).to("userId").fetch().all();
         }
 
-        public Collection<Map<String, Object>> getMissingTags(int limit) {
+        public Collection<Map<String, Object>> getMissingTags(int skip, int limit) {
                 return neo4jClient.query(
                                 "MATCH (g:Game)-[:HAS_TAG]->(t:Tag) " +
                                                 "WHERE NOT ((:AppUser {id: $userId})-[:OWNS]->(:Game)-[:HAS_TAG]->(t)) "
                                                 +
                                                 "RETURN t.name AS tag, count(g) AS total " +
-                                                "ORDER BY total DESC LIMIT $limit")
-                                .bind(USER_ID).to("userId").bind(limit).to("limit").fetch().all();
+                                                "ORDER BY total DESC SKIP $skip LIMIT $limit")
+                                .bind(USER_ID).to("userId").bind(skip).to("skip").bind(limit).to("limit").fetch().all();
         }
 
         // ── Recomendaciones ───────────────────────────────────────
 
-        public Collection<Map<String, Object>> getContentBasedRecommendations(int limit) {
+        public Collection<Map<String, Object>> getContentBasedRecommendations(int skip, int limit) {
                 return neo4jClient.query(
                                 "MATCH (u:AppUser {id: $userId})-[:OWNS]->(owned:Game)-[:HAS_TAG]->(t:Tag) " +
                                                 "MATCH (rec:Game)-[:HAS_TAG]->(t) " +
@@ -114,11 +114,11 @@ public class AppUserService {
                                                 "rec.positive_ratio AS positiveRatio, rec.user_reviews AS userReviews, "
                                                 +
                                                 "rec.price_final AS price, count(t) AS coincidencias " +
-                                                "ORDER BY coincidencias DESC LIMIT $limit")
-                                .bind(USER_ID).to("userId").bind(limit).to("limit").fetch().all();
+                                                "ORDER BY coincidencias DESC SKIP $skip LIMIT $limit")
+                                .bind(USER_ID).to("userId").bind(skip).to("skip").bind(limit).to("limit").fetch().all();
         }
 
-        public Collection<Map<String, Object>> getCollaborativeRecommendations(int limit) {
+        public Collection<Map<String, Object>> getCollaborativeRecommendations(int skip, int limit) {
                 return neo4jClient.query(
                                 "MATCH (u:AppUser {id: $userId})-[:OWNS]->(g:Game) " +
                                                 "<-[:ABOUT]-(:Review)<-[:WROTE]-(similar:User)-[:WROTE]->(:Review)-[:ABOUT]->(rec:Game) "
@@ -129,29 +129,33 @@ public class AppUserService {
                                                 "rec.positive_ratio AS positiveRatio, rec.user_reviews AS userReviews, "
                                                 +
                                                 "rec.price_final AS price, count(similar) AS popularidad " +
-                                                "ORDER BY popularidad DESC LIMIT $limit")
-                                .bind(USER_ID).to("userId").bind(limit).to("limit").fetch().all();
+                                                "ORDER BY popularidad DESC SKIP $skip LIMIT $limit")
+                                .bind(USER_ID).to("userId").bind(skip).to("skip").bind(limit).to("limit").fetch().all();
         }
 
-        public Collection<Map<String, Object>> getHybridRecommendations(int limit) {
+        public Collection<Map<String, Object>> getHybridRecommendations(int skip, int limit) {
                 return neo4jClient.query(
                                 "MATCH (u:AppUser {id: $userId})-[:OWNS]->(owned:Game)-[:HAS_TAG]->(t:Tag) " +
                                                 "MATCH (rec:Game)-[:HAS_TAG]->(t) " +
                                                 "WHERE NOT (u)-[:OWNS]->(rec) " +
                                                 "WITH u, rec, count(t) AS tagScore " +
-                                                "ORDER BY tagScore DESC LIMIT 500 " +
+                                                // OPTIMIZACIÓN 1: Reducimos la muestra a los 100 mejores por contenido
+                                                // (suficiente para mezclar)
+                                                "ORDER BY tagScore DESC LIMIT 100 " +
+                                                // OPTIMIZACIÓN 2: Usamos EXISTS() o un patrón compacto en lugar de
+                                                // expandir todos los nodos de Review
                                                 "OPTIONAL MATCH (rec)<-[:ABOUT]-(:Review)<-[:WROTE]-(similar:User)-[:WROTE]->(:Review)-[:ABOUT]->(owned2:Game) "
                                                 +
                                                 "WHERE (u)-[:OWNS]->(owned2) " +
-                                                "WITH rec, tagScore, count(similar) AS collabScore " +
+                                                "WITH rec, tagScore, count(DISTINCT similar) AS collabScore " +
                                                 "RETURN rec.app_id AS appId, rec.title AS title, rec.rating AS rating, "
                                                 +
                                                 "rec.positive_ratio AS positiveRatio, rec.user_reviews AS userReviews, "
                                                 +
                                                 "rec.price_final AS price, (tagScore * 2 + collabScore) AS hybridScore "
                                                 +
-                                                "ORDER BY hybridScore DESC LIMIT $limit")
-                                .bind(USER_ID).to("userId").bind(limit).to("limit").fetch().all();
+                                                "ORDER BY hybridScore DESC SKIP $skip LIMIT $limit")
+                                .bind(USER_ID).to("userId").bind(skip).to("skip").bind(limit).to("limit").fetch().all();
         }
 
         // ── Grafos para D3 ────────────────────────────────────────

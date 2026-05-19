@@ -15,6 +15,7 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll() // <-- Rutas de Swagger
                         .anyRequest().permitAll());
         return http.build();
     }
