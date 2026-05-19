@@ -1,0 +1,25 @@
+<div class="navbar bg-neutral text-neutral-content shadow-lg px-4 md:px-8">
+  <div class="flex-1">
+    <a routerLink="/dashboard/inicio" class="btn btn-ghost text-2xl font-black tracking-widest text-primary font-mono uppercase">
+      MATCH<span class="text-secondary">PLAY</span>
+    </a>
+  </div>
+  
+  <div class="flex-none hidden md:flex">
+    <ul class="menu menu-horizontal px-1 font-semibold tracking-wide">
+      <li><a routerLink="/dashboard/inicio" routerLinkActive="text-white bg-primary" class="hover:border-b-2 hover:border-primary hover:text-white rounded-none">Catálogo</a></li>
+      <li><a routerLink="/dashboard/resumen" routerLinkActive="text-white bg-primary" class="hover:border-b-2 hover:border-primary hover:text-white rounded-none">Descubir</a></li>
+    </ul>
+  </div>
+
+  <div class="flex-none flex items-center gap-4 ml-4">
+    <div routerLink="/dashboard/perfil" class="flex items-center gap-3 bg-base-300 py-1 px-3 rounded-full cursor-pointer hover:ring ring-primary transition-all">
+      <span class="text-sm font-bold hidden sm:block text-base-content">Tú</span>
+      <div class="avatar online">
+        <div class="w-8 rounded-full">
+          <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Gamer_77&backgroundColor=1f2937" alt="User Avatar" />
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
