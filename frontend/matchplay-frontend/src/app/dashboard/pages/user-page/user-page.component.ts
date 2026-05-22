@@ -56,12 +56,10 @@ export class UserPageComponent implements OnInit {
   }
 
   addToLibrary(appId: number, event: Event): void {
-    event.stopPropagation(); // Evita que el click se propague a la tarjeta
+    event.stopPropagation();
     this.gamesService.addGameToLibrary(appId).subscribe({
       next: (updatedUser) => {
-        // Actualizamos la señal con la nueva biblioteca recibida del backend
         this.user.set(updatedUser);
-        // Recargamos el resumen al añadir un juego nuevo
         this.loadStats();
       },
       error: (err) => {
@@ -71,11 +69,10 @@ export class UserPageComponent implements OnInit {
   }
 
   removeFromLibrary(appId: number, event: Event): void {
-    event.stopPropagation(); // Evita que el click se propague a la tarjeta
+    event.stopPropagation();
     this.gamesService.removeGameFromLibrary(appId).subscribe({
       next: (updatedUser) => {
         this.user.set(updatedUser);
-        // Recargamos el resumen estadístico al quitar el juego
         this.loadStats();
       },
       error: (err) => {
