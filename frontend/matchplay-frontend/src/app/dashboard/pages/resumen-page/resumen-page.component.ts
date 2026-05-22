@@ -15,21 +15,18 @@ export class ResumenPageComponent implements OnInit {
   public gamesService = inject(GamesService);
   @ViewChild('d3Container', { static: true }) d3Container!: ElementRef;
 
-  // Estado del Grafo Interactivo
   public activeGraph = signal<'games' | 'tags'>('games');
-  private simulation: any; // Instancia de la simulación de D3
+  private simulation: any;
 
   // Señales de Recomendaciones
   public hybridRecs = signal<Game[]>([]);
   public contentRecs = signal<Game[]>([]);
   public collabRecs = signal<Game[]>([]);
 
-  // Señales de extracción de grafo para D3
   public graphSimilarGames = signal<any[]>([]);
   public graphRelatedTags = signal<any[]>([]);
 
   constructor() {
-    // Efecto reactivo: Se vuelve a dibujar el grafo automáticamente si cambian los datos o la pestaña activa
     effect(() => {
       const gamesData = this.graphSimilarGames();
       const tagsData = this.graphRelatedTags();
@@ -46,16 +43,12 @@ export class ResumenPageComponent implements OnInit {
   }
 
   public loadRecommendations(): void {
-    // 1. Cargamos el algoritmo híbrido principal (8 juegos)
     this.gamesService.getRecommendationsHybrid(8).subscribe(data => this.hybridRecs.set(data));
     
-    // 2. Cargamos las recomendaciones de contenido (4 juegos alternativos)
     this.gamesService.getRecommendationsContent(4).subscribe(data => this.contentRecs.set(data));
     
-    // 3. Cargamos las recomendaciones colaborativas (4 juegos alternativos)
     this.gamesService.getRecommendationsCollaborative(4).subscribe(data => this.collabRecs.set(data));
 
-    // 4. Extraemos datos topológicos puros para visualización D3
     this.gamesService.getGraphSimilarGames().subscribe(data => this.graphSimilarGames.set(data));
     this.gamesService.getGraphRelatedTags().subscribe(data => this.graphRelatedTags.set(data));
   }
@@ -67,14 +60,10 @@ export class ResumenPageComponent implements OnInit {
     event.stopPropagation();
     this.gamesService.addGameToLibrary(appId).subscribe({
       next: () => {
-        // Eliminamos el juego de las 3 listas instantáneamente en el frontend
-        // para dar feedback inmediato al usuario
         this.hybridRecs.update(recs => recs.filter(g => g.appId !== appId));
         this.contentRecs.update(recs => recs.filter(g => g.appId !== appId));
         this.collabRecs.update(recs => recs.filter(g => g.appId !== appId));
         
-        // En un caso real se podría invocar de nuevo loadRecommendations() 
-        // para reemplazar el hueco vacío que queda.
       },
       error: (err) => console.error('Error al añadir juego desde descubrir', err)
     });
@@ -86,10 +75,10 @@ export class ResumenPageComponent implements OnInit {
 
   private renderGraph(active: 'games' | 'tags', gamesData: any[], tagsData: any[]): void {
     const container = this.d3Container.nativeElement;
-    d3.select(container).selectAll('*').remove(); // Limpiar grafo anterior
-    if (this.simulation) this.simulation.stop(); // Detener cálculos en segundo plano
+    d3.select(container).selectAll('*').remove();
+    if (this.simulation) this.simulation.stop();
 
-    // 1. Preparar Nodos y Enlaces (Edges) dependiendo del grafo elegido
+    // 1. Preparar Nodos y Enlaces dependiendo del grafo elegido
     const nodesMap = new Map<string | number, any>();
     const links: any[] = [];
 
@@ -106,7 +95,7 @@ export class ResumenPageComponent implements OnInit {
         links.push({ source: edge.source, target: edge.target, value: edge.weight });
       });
     } else {
-      return; // No hay datos para mostrar
+      return;
     }
 
     const nodes = Array.from(nodesMap.values());
@@ -152,13 +141,11 @@ export class ResumenPageComponent implements OnInit {
         .on('end',   (event: any, d: any) => { if (!event.active) this.simulation.alphaTarget(0); d.fx = null; d.fy = null; }) as any
       );
 
-    // Círculos
     node.append('circle')
       .attr('r', (d: any) => d.group === 3 ? 12 : 8)
       .attr('fill', (d: any) => d.group === 1 ? '#00a96e' : (d.group === 2 ? '#ff5861' : '#00b5ff'))
       .attr('stroke', '#191e24').attr('stroke-width', 2);
 
-    // Etiquetas de Texto
     node.append('text')
       .text((d: any) => d.label)
       .attr('x', 14).attr('y', 4)

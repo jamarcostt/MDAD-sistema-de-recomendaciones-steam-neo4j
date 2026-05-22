@@ -24,8 +24,6 @@ public class AppUserService {
 
         // ── Biblioteca ────────────────────────────────────────────
 
-        // ── Biblioteca ────────────────────────────────────────────
-
         public AppUser getUser() {
                 return appUserRepository.findById(USER_ID)
                                 .orElseThrow(() -> new RuntimeException(
@@ -33,15 +31,11 @@ public class AppUserService {
         }
 
         public AppUser addGameToLibrary(Long appId) {
-                // 1. Garantizar que el nodo AppUser existe ANTES de hacer la relación
                 getUser();
 
-                // 2. Verificar que el juego existe en el catálogo
                 gameRepository.findById(appId)
                                 .orElseThrow(() -> new RuntimeException("Juego no encontrado: " + appId));
 
-                // 3. Crear la relación (MATCH separados para evitar el Cartesian Product
-                // Warning)
                 neo4jClient.query(
                                 "MATCH (u:AppUser {id: $userId}) " +
                                                 "MATCH (g:Game {app_id: $appId}) " +
@@ -139,11 +133,7 @@ public class AppUserService {
                                                 "MATCH (rec:Game)-[:HAS_TAG]->(t) " +
                                                 "WHERE NOT (u)-[:OWNS]->(rec) " +
                                                 "WITH u, rec, count(t) AS tagScore " +
-                                                // OPTIMIZACIÓN 1: Reducimos la muestra a los 100 mejores por contenido
-                                                // (suficiente para mezclar)
                                                 "ORDER BY tagScore DESC LIMIT 100 " +
-                                                // OPTIMIZACIÓN 2: Usamos EXISTS() o un patrón compacto en lugar de
-                                                // expandir todos los nodos de Review
                                                 "OPTIONAL MATCH (rec)<-[:ABOUT]-(:Review)<-[:WROTE]-(similar:User)-[:WROTE]->(:Review)-[:ABOUT]->(owned2:Game) "
                                                 +
                                                 "WHERE (u)-[:OWNS]->(owned2) " +

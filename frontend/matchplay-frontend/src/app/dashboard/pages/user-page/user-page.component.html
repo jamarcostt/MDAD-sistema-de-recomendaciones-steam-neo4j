@@ -28,10 +28,8 @@
             <figure class="aspect-video bg-base-300 relative overflow-hidden">
               <img [src]="'https://cdn.akamai.steamstatic.com/steam/apps/' + game.appId + '/header.jpg'" [alt]="game.title" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
               
-              <!-- Overlay oscuro para asegurar contraste -->
               <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
               
-              <!-- Botón de añadir (visible en hover) -->
               <button 
                 class="btn btn-sm btn-accent absolute bottom-2 right-2 opacity-0 group-hover:opacity-100 transition-all duration-300 shadow-[0_4px_10px_rgba(0,0,0,0.5)] border-none text-white font-bold"
                 (click)="addToLibrary(game.appId, $event)">
@@ -81,10 +79,8 @@
             <figure class="aspect-video bg-base-300 relative overflow-hidden">
               <img [src]="'https://cdn.akamai.steamstatic.com/steam/apps/' + game.appId + '/header.jpg'" [alt]="game.title" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
               
-              <!-- Overlay oscuro para asegurar contraste -->
               <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
               
-              <!-- Botón de eliminar (visible en hover) -->
               <button 
                 class="btn btn-sm btn-error absolute bottom-2 right-2 opacity-0 group-hover:opacity-100 transition-all duration-300 shadow-[0_4px_10px_rgba(0,0,0,0.5)] border-none text-white font-bold"
                 (click)="removeFromLibrary(game.appId, $event)">
@@ -116,17 +112,14 @@
     }
   </section>
 
-  <!-- Resumen / Estadísticas Section -->
   <section class="bg-base-100 p-6 rounded-2xl border border-base-300 shadow-xl">
     <h2 class="text-2xl font-bold uppercase tracking-tight text-accent mb-6">Tu Resumen</h2>
     
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-      <!-- Comparativas -->
       <div class="flex flex-col gap-4">
         <h3 class="text-lg font-bold text-base-content/80">Comparativas Globales</h3>
         <div class="stats stats-vertical sm:stats-horizontal shadow bg-base-200 border border-base-300">
           
-          <!-- Precio Medio -->
           <div class="stat">
             <div class="stat-figure text-primary">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="inline-block w-8 h-8 stroke-current"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
@@ -136,7 +129,6 @@
             <div class="stat-desc font-medium">Global: {{ priceComparison()?.globalAvg | number:'1.2-2' }}€</div>
           </div>
           
-          <!-- Ratio Medio -->
           <div class="stat">
             <div class="stat-figure text-secondary">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="inline-block w-8 h-8 stroke-current"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
@@ -149,7 +141,6 @@
         </div>
       </div>
 
-      <!-- Distribución de Etiquetas -->
       <div class="flex flex-col gap-4">
         <h3 class="text-lg font-bold text-base-content/80">Tus Géneros Favoritos</h3>
         <div class="flex flex-wrap gap-2">
@@ -164,7 +155,6 @@
         </div>
       </div>
 
-      <!-- Etiquetas Faltantes -->
       <div class="lg:col-span-2 mt-2">
         <h3 class="text-lg font-bold text-base-content/80 mb-4">Podría interesarte (Géneros que te faltan)</h3>
         <div class="flex flex-wrap gap-2">
