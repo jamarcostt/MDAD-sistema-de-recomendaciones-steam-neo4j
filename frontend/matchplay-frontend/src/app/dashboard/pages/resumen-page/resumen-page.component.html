@@ -1,0 +1,159 @@
+<div class="flex flex-col gap-8 w-full h-full animate-fade-in pb-10">
+
+  <!-- Encabezado -->
+  <section class="bg-base-100 p-6 rounded-2xl border border-base-300 shadow-xl flex justify-between items-center flex-wrap gap-4">
+    <div>
+      <h1 class="text-3xl md:text-4xl font-black uppercase tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary">Descubrir</h1>
+      <p class="text-base-content/70 mt-1 font-medium">Recomendaciones personalizadas basadas en el grafo de Neo4j</p>
+    </div>
+    <button class="btn btn-primary btn-outline" (click)="loadRecommendations()">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+      Refrescar Red
+    </button>
+  </section>
+
+  <!-- 1. Recomendaciones Híbridas (Las mejores) -->
+  <section class="flex flex-col gap-4">
+    <h2 class="text-2xl font-bold flex items-center gap-2 text-accent">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+      Juegos perfectos para ti
+    </h2>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+      @for (game of hybridRecs(); track game.appId) {
+        <div class="card bg-base-200 shadow-lg border border-base-300 hover:border-accent transition-all duration-300 cursor-pointer group">
+          <figure class="aspect-video bg-base-300 relative overflow-hidden">
+            <img [src]="'https://cdn.akamai.steamstatic.com/steam/apps/' + game.appId + '/header.jpg'" [alt]="game.title" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+            <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
+            <button class="btn btn-sm btn-accent absolute bottom-2 right-2 opacity-0 group-hover:opacity-100 transition-all duration-300 border-none text-white font-bold shadow-lg" (click)="addToLibrary(game.appId, $event)">
+              Añadir a biblioteca
+            </button>
+          </figure>
+          <div class="card-body p-4">
+            <div class="flex justify-between items-start gap-2">
+              <h3 class="card-title text-md font-bold line-clamp-1" [title]="game.title">{{ game.title }}</h3>
+              <div class="flex items-center gap-1 text-warning font-black whitespace-nowrap text-sm">
+                <span>★</span><span>{{ (game.positiveRatio / 20) | number:'1.1-1' }}</span>
+              </div>
+            </div>
+            <div class="flex flex-wrap gap-1 mt-2 mb-1">
+              @if (game.tags && game.tags.length > 0) {
+                @for (tag of game.tags | slice:0:3; track $index) {
+                  <div class="badge badge-primary badge-outline badge-xs font-bold">{{ tag.name || tag }}</div>
+                }
+              } @else {
+                <div class="badge badge-ghost badge-xs font-bold text-base-content/40">Sin etiquetas</div>
+              }
+            </div>
+            <div class="flex justify-end items-center mt-auto">
+              <span class="badge badge-accent badge-sm font-bold">{{ game.positiveRatio }}% Match</span>
+            </div>
+          </div>
+        </div>
+      } @empty {
+        <p class="text-base-content/60 py-4 col-span-full">Añade más juegos a tu biblioteca para recibir recomendaciones personalizadas.</p>
+      }
+    </div>
+  </section>
+
+  <div class="grid grid-cols-1 xl:grid-cols-2 gap-8">
+    <!-- 2. Recomendaciones por Contenido -->
+    <section class="flex flex-col gap-4">
+      <h2 class="text-xl font-bold flex items-center gap-2 text-secondary">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>
+        Por el contenido que juegas
+      </h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        @for (game of contentRecs(); track game.appId) {
+          <div class="card bg-base-200 shadow-md border border-base-300 hover:border-secondary transition-all cursor-pointer group">
+            <figure class="aspect-video relative overflow-hidden">
+              <img [src]="'https://cdn.akamai.steamstatic.com/steam/apps/' + game.appId + '/header.jpg'" class="w-full h-full object-cover transition-transform group-hover:scale-105" />
+              <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+              <button class="btn btn-xs btn-secondary absolute bottom-2 right-2 opacity-0 group-hover:opacity-100 text-white" (click)="addToLibrary(game.appId, $event)">Añadir a la biblioteca</button>
+            </figure>
+            <div class="p-3">
+              <div class="flex justify-between items-start gap-1">
+                <h3 class="font-bold text-sm line-clamp-1" [title]="game.title">{{ game.title }}</h3>
+                <div class="flex items-center gap-1 text-warning font-black whitespace-nowrap text-xs">
+                  <span>★</span><span>{{ (game.positiveRatio / 20) | number:'1.1-1' }}</span>
+                </div>
+              </div>
+              <div class="flex flex-wrap gap-1 mt-1">
+                @if (game.tags && game.tags.length > 0) {
+                  @for (tag of game.tags | slice:0:2; track $index) {
+                    <div class="badge badge-primary badge-outline badge-xs font-bold">{{ tag.name || tag }}</div>
+                  }
+                } @else {
+                  <div class="badge badge-ghost badge-xs font-bold text-base-content/40">Sin etiquetas</div>
+                }
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+    </section>
+
+    <!-- 3. Recomendaciones Colaborativas -->
+    <section class="flex flex-col gap-4">
+      <h2 class="text-xl font-bold flex items-center gap-2 text-info">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
+        Según lo que juegan otros como tú
+      </h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        @for (game of collabRecs(); track game.appId) {
+          <div class="card bg-base-200 shadow-md border border-base-300 hover:border-info transition-all cursor-pointer group">
+            <figure class="aspect-video relative overflow-hidden">
+              <img [src]="'https://cdn.akamai.steamstatic.com/steam/apps/' + game.appId + '/header.jpg'" class="w-full h-full object-cover transition-transform group-hover:scale-105" />
+              <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+              <button class="btn btn-xs btn-info absolute bottom-2 right-2 opacity-0 group-hover:opacity-100 text-white" (click)="addToLibrary(game.appId, $event)">Añadir a la biblioteca</button>
+            </figure>
+            <div class="p-3">
+              <div class="flex justify-between items-start gap-1">
+                <h3 class="font-bold text-sm line-clamp-1" [title]="game.title">{{ game.title }}</h3>
+                <div class="flex items-center gap-1 text-warning font-black whitespace-nowrap text-xs">
+                  <span>★</span><span>{{ (game.positiveRatio / 20) | number:'1.1-1' }}</span>
+                </div>
+              </div>
+              <div class="flex flex-wrap gap-1 mt-1">
+                @if (game.tags && game.tags.length > 0) {
+                  @for (tag of game.tags | slice:0:2; track $index) {
+                    <div class="badge badge-primary badge-outline badge-xs font-bold">{{ tag.name || tag }}</div>
+                  }
+                } @else {
+                  <div class="badge badge-ghost badge-xs font-bold text-base-content/40">Sin etiquetas</div>
+                }
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+    </section>
+  </div>
+
+  <!-- Contenedor principal para D3.js -->
+  <section class="bg-base-100 p-6 rounded-2xl border border-base-300 shadow-xl mt-2 flex flex-col gap-4">
+    <div class="flex justify-between items-center flex-wrap gap-4">
+      <h2 class="text-2xl font-bold uppercase tracking-tight text-neutral-content">Explorar tu Red</h2>
+      
+      <div class="tabs tabs-boxed bg-base-200">
+        <a class="tab font-bold" [class.tab-active]="activeGraph() === 'games'" (click)="activeGraph.set('games')">Juegos Similares</a>
+        <a class="tab font-bold" [class.tab-active]="activeGraph() === 'tags'" (click)="activeGraph.set('tags')">Tus Etiquetas</a>
+      </div>
+    </div>
+
+    <div class="grow bg-neutral rounded-box border border-base-200 flex flex-col min-h-[600px] shadow-inner relative overflow-hidden">
+      @if (graphSimilarGames().length === 0 && graphRelatedTags().length === 0) {
+        <div class="absolute inset-0 z-20 flex flex-col items-center justify-center bg-neutral/80 backdrop-blur-sm">
+          <span class="loading loading-infinity loading-lg text-primary scale-150"></span>
+          <p class="mt-8 text-primary/70 font-mono tracking-widest uppercase font-bold text-sm">Construyendo grafo en Neo4j...</p>
+        </div>
+      }
+
+      <!-- Contenedor inyectado por D3.js -->
+      <div #d3Container class="w-full grow min-h-[600px] z-10 cursor-move"></div>
+      
+      <!-- Rejilla de fondo para dar estilo de tecnología/gaming -->
+      <div class="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px] pointer-events-none z-0"></div>
+    </div>
+  </section>
+
+</div>

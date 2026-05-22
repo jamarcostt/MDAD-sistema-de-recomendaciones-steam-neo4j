@@ -1,0 +1,181 @@
+<div class="flex flex-col gap-8 w-full h-full animate-fade-in pb-10">
+
+  <!-- Buscador Section -->
+  <section class="bg-base-100 p-6 rounded-2xl border border-base-300 shadow-xl">
+    <h2 class="text-2xl font-bold mb-4 uppercase tracking-tight text-primary">Buscar videojuego</h2>
+    <div class="flex gap-2 w-full max-w-2xl">
+      <input 
+        type="text" 
+        placeholder="Escribe el nombre de un juego..." 
+        class="input input-bordered input-primary w-full"
+        [(ngModel)]="searchQuery"
+        (keyup.enter)="onSearch()"
+      />
+      <button class="btn btn-primary" (click)="onSearch()" [disabled]="isSearching()">
+        @if (isSearching()) {
+          <span class="loading loading-spinner"></span>
+        } @else {
+          Buscar
+        }
+      </button>
+    </div>
+
+    <!-- Resultados de búsqueda -->
+    @if (searchResults().length > 0) {
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mt-6">
+        @for (game of searchResults(); track game.appId) {
+          <div class="card bg-base-200 shadow-lg border border-base-300 hover:border-primary transition-all duration-300 cursor-pointer group">
+            <figure class="aspect-video bg-base-300 relative overflow-hidden">
+              <img [src]="'https://cdn.akamai.steamstatic.com/steam/apps/' + game.appId + '/header.jpg'" [alt]="game.title" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+              
+              <!-- Overlay oscuro para asegurar contraste -->
+              <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
+              
+              <!-- Botón de añadir (visible en hover) -->
+              <button 
+                class="btn btn-sm btn-accent absolute bottom-2 right-2 opacity-0 group-hover:opacity-100 transition-all duration-300 shadow-[0_4px_10px_rgba(0,0,0,0.5)] border-none text-white font-bold"
+                (click)="addToLibrary(game.appId, $event)">
+                Añadir a la biblioteca
+              </button>
+            </figure>
+            <div class="card-body p-4">
+              <div class="flex justify-between items-start gap-2">
+                <h3 class="card-title text-md font-bold line-clamp-1" [title]="game.title">{{ game.title }}</h3>
+                <div class="flex items-center gap-1 text-warning font-black whitespace-nowrap text-sm">
+                  <span>★</span><span>{{ (game.positiveRatio / 20) | number:'1.1-1' }}</span>
+                </div>
+              </div>
+              <div class="flex flex-wrap gap-1 mt-1">
+                @if (game.tags && game.tags.length > 0) {
+                  @for (tag of game.tags | slice:0:3; track $index) {
+                    <div class="badge badge-primary badge-outline badge-xs font-bold">{{ tag.name || tag }}</div>
+                  }
+                } @else {
+                  <div class="badge badge-ghost badge-xs font-bold text-base-content/40">Sin etiquetas</div>
+                }
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+    }
+  </section>
+
+  <!-- Biblioteca Section -->
+  <section class="bg-base-100 p-6 rounded-2xl border border-base-300 shadow-xl">
+    <div class="flex items-center justify-between mb-6">
+      <h2 class="text-2xl font-bold uppercase tracking-tight text-secondary">Mi Biblioteca</h2>
+      @if (user()) {
+        <span class="badge badge-secondary badge-outline font-bold">{{ user()?.library?.length || 0 }} Juegos</span>
+      }
+    </div>
+    
+    @if (!user()) {
+      <div class="flex items-center gap-3 text-base-content/70 font-semibold py-4">
+        <span class="loading loading-spinner loading-md"></span> Cargando biblioteca...
+      </div>
+    } @else {
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        @for (game of user()?.library; track game.appId) {
+          <div class="card bg-base-200 shadow-lg border border-base-300 hover:border-error transition-all duration-300 cursor-pointer group">
+            <figure class="aspect-video bg-base-300 relative overflow-hidden">
+              <img [src]="'https://cdn.akamai.steamstatic.com/steam/apps/' + game.appId + '/header.jpg'" [alt]="game.title" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+              
+              <!-- Overlay oscuro para asegurar contraste -->
+              <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
+              
+              <!-- Botón de eliminar (visible en hover) -->
+              <button 
+                class="btn btn-sm btn-error absolute bottom-2 right-2 opacity-0 group-hover:opacity-100 transition-all duration-300 shadow-[0_4px_10px_rgba(0,0,0,0.5)] border-none text-white font-bold"
+                (click)="removeFromLibrary(game.appId, $event)">
+                Eliminar
+              </button>
+            </figure>
+            <div class="card-body p-4">
+              <div class="flex justify-between items-start gap-2">
+                <h3 class="card-title text-md font-bold line-clamp-1" [title]="game.title">{{ game.title }}</h3>
+                <div class="flex items-center gap-1 text-warning font-black whitespace-nowrap text-sm">
+                  <span>★</span><span>{{ (game.positiveRatio / 20) | number:'1.1-1' }}</span>
+                </div>
+              </div>
+              <div class="flex flex-wrap gap-1 mt-1">
+                @if (game.tags && game.tags.length > 0) {
+                  @for (tag of game.tags | slice:0:3; track $index) {
+                    <div class="badge badge-primary badge-outline badge-xs font-bold">{{ tag.name || tag }}</div>
+                  }
+                } @else {
+                  <div class="badge badge-ghost badge-xs font-bold text-base-content/40">Sin etiquetas</div>
+                }
+              </div>
+            </div>
+          </div>
+        } @empty {
+          <p class="col-span-full text-base-content/70 py-4">Aún no tienes juegos en tu biblioteca.</p>
+        }
+      </div>
+    }
+  </section>
+
+  <!-- Resumen / Estadísticas Section -->
+  <section class="bg-base-100 p-6 rounded-2xl border border-base-300 shadow-xl">
+    <h2 class="text-2xl font-bold uppercase tracking-tight text-accent mb-6">Tu Resumen</h2>
+    
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <!-- Comparativas -->
+      <div class="flex flex-col gap-4">
+        <h3 class="text-lg font-bold text-base-content/80">Comparativas Globales</h3>
+        <div class="stats stats-vertical sm:stats-horizontal shadow bg-base-200 border border-base-300">
+          
+          <!-- Precio Medio -->
+          <div class="stat">
+            <div class="stat-figure text-primary">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="inline-block w-8 h-8 stroke-current"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
+            </div>
+            <div class="stat-title font-semibold">Tu Precio Medio</div>
+            <div class="stat-value text-primary">{{ priceComparison()?.userAvg | number:'1.2-2' }}€</div>
+            <div class="stat-desc font-medium">Global: {{ priceComparison()?.globalAvg | number:'1.2-2' }}€</div>
+          </div>
+          
+          <!-- Ratio Medio -->
+          <div class="stat">
+            <div class="stat-figure text-secondary">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="inline-block w-8 h-8 stroke-current"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+            </div>
+            <div class="stat-title font-semibold">Tu Ratio Medio</div>
+            <div class="stat-value text-secondary">{{ ratioComparison()?.userAvg | number:'1.0-0' }}%</div>
+            <div class="stat-desc font-medium">Global: {{ ratioComparison()?.globalAvg | number:'1.0-0' }}%</div>
+          </div>
+          
+        </div>
+      </div>
+
+      <!-- Distribución de Etiquetas -->
+      <div class="flex flex-col gap-4">
+        <h3 class="text-lg font-bold text-base-content/80">Tus Géneros Favoritos</h3>
+        <div class="flex flex-wrap gap-2">
+          @for (tag of tagDistribution(); track tag.tag) {
+            <div class="badge badge-primary badge-lg gap-2 font-semibold shadow-sm p-3">
+              {{ tag.tag }}
+              <span class="badge badge-sm badge-neutral">{{ tag.total }}</span>
+            </div>
+          } @empty {
+            <p class="text-sm text-base-content/60">Añade juegos a tu biblioteca para ver tus géneros favoritos.</p>
+          }
+        </div>
+      </div>
+
+      <!-- Etiquetas Faltantes -->
+      <div class="lg:col-span-2 mt-2">
+        <h3 class="text-lg font-bold text-base-content/80 mb-4">Podría interesarte (Géneros que te faltan)</h3>
+        <div class="flex flex-wrap gap-2">
+          @for (tag of missingTags(); track tag.tag) {
+            <div class="badge badge-outline badge-secondary font-semibold p-3">{{ tag.tag }}</div>
+          } @empty {
+            <p class="text-sm text-base-content/60 font-medium">¡Tienes juegos de todos los géneros populares!</p>
+          }
+        </div>
+      </div>
+    </div>
+  </section>
+
+</div>
